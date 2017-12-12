@@ -1,2 +1,2 @@
 # Talk
-IDE USED: Qtcreator
+IDE USED: Qt creator
