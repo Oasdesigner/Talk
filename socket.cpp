@@ -41,7 +41,7 @@ void Socket::recive_from(Message message, sockaddr_in local_address){
         std::cerr << "falló recvfrom: " << std::strerror(errno) << '\n';
         throw 8;
     }
-    std::cout<<message.text<<std::endl;
+    std::cout<<"Recived ->"<<message.text<<std::endl;
 }
 
 
