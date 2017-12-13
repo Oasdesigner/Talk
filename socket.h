@@ -11,6 +11,7 @@
 struct Message {
 //    size_t lenght_buffer = 1024;
     char text[1024];
+    pthread_mutex_t mutex1;
 };
 class Socket
 {

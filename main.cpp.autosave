@@ -79,7 +79,6 @@ void call_recieve_from (Socket socket_main,sockaddr_in local_address_main){
         std::cout<<message_main.text<<std::endl;
     }
 }
-
 void request_cancelation(std::thread& thread){
         pthread_cancel(thread.native_handle());
 }
