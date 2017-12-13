@@ -34,6 +34,7 @@ void Socket::send_to(Message message, sockaddr_in remote_address){
 
 void Socket::recive_from(Message message, sockaddr_in local_address){
 
+
     socklen_t src_len = sizeof(local_address);
 
     int result = recvfrom(fd, &message, sizeof(message), 0,reinterpret_cast<sockaddr*>(&local_address), &src_len);
@@ -41,7 +42,11 @@ void Socket::recive_from(Message message, sockaddr_in local_address){
         std::cerr << "falló recvfrom: " << std::strerror(errno) << '\n';
         throw 8;
     }
-    std::cout<<"Recived -> "<<message.text;
+    if(strcmp(message.text,"##12344321##!asd3sfg2d")==0){
+        std::cout<<"El usuario se ha desconectado"<<std::endl;
+    }else{
+        std::cout<< message.text ;
+    }
 }
 
 
