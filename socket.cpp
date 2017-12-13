@@ -9,7 +9,7 @@ Socket::Socket(const sockaddr_in& address)
    fd = socket(AF_INET, SOCK_DGRAM, 0);
    if (fd < 0) {
      std::cerr << "no se pudo crear el socket: " << std::strerror(errno) << '\n';
-     throw 3;    // Error. Termina el programa siempre con un valor > 0
+     throw std::system_error(errno, std::system_category(), "Error al crear el socket");
     }
 
    int result = bind(fd, reinterpret_cast <const sockaddr*>(&address), sizeof(address));

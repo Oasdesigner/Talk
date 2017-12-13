@@ -22,19 +22,38 @@ void write(Message& message_main){
     message_main.text[sz] = '\0';
 }
 std::string menu(std::string parameter){
-    std::string aux = "";
-    std::cout<<"127.0.0.";
-    std::getline(std::cin,aux);
-    std::string final = parameter + aux;
+    bool condition=true;
+    std::string final;
+    while (condition){
+        std::string aux = "";
+        std::cout<<"127.0.0.";
+        std::getline(std::cin,aux);
+        int aux1 = atoi(aux.c_str());
+        if((aux1<10)&&(aux1>0)){
+            final = parameter + aux;
+            condition=false;
+        }else{
+            std::cout<<"Error al coger la ip, introduzca una dirección valida"<<std::endl;
+        }
+    }
     return final;
 }
 int choose_port(std::string parameter){
-    std::string aux = "";
-    std::cout<<"3265";
-    std::getline(std::cin,aux);
-    std::string aux2 = parameter + aux;
-    int final = atoi(aux2.c_str());
-    std::cout<<final;
+    bool condition=true;
+    int final =0;
+    while(condition){
+        std::string aux = "";
+        std::cout<<"3265";
+        std::getline(std::cin,aux);
+        int aux3 = atoi(aux.c_str());
+        if((aux3>0)&&(aux3<10)){
+            std::string aux2 = parameter + aux;
+            final = atoi(aux2.c_str());
+            condition=false;
+        }else{
+            std::cout<<"Error al elegir el puerto, ponga un numero valido"<<std::endl;
+        }
+    }
     return final;
 
 }
@@ -59,14 +78,29 @@ int main()
     bool condition=true;
     //Send and recieve messages
     while(condition==true){
-        Message message_main;
-        write(message_main);
 
-        socket_main.send_to(message_main,remote_address_main);
-        socket_main.recive_from(message_main,local_address_main);
+       try{
+            Message message_main;
+            write(message_main);
 
-        if(strcmp(message_main.text,"EXIT")==0)
-            condition=false;
+            socket_main.send_to(message_main,remote_address_main);
+            socket_main.recive_from(message_main,local_address_main);
+
+            if(strcmp(message_main.text,"\\quit")==0)
+                condition=false;
+        }
+        catch(std::system_error& e) {
+            std::cerr << program_invocation_name << e.what() << "Error de sistema\n";
+            return 2;
+        }
+
+        catch(std::bad_alloc& e) {
+            std::cerr << program_invocation_name << e.what() << "Memoria insuficiente\n";
+            return 1;
+        }
+        catch (...) {
+            std::cerr << program_invocation_name << strerror(errno) << "Error desconocido\n";
+        }
 
     }
 

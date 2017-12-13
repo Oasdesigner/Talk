@@ -16,7 +16,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += main.cpp \
     socket.cpp
-unix: LIBS += -lpthread
+LIBS += -lpthread
 
 HEADERS += \
     socket.h
