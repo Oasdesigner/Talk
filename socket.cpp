@@ -20,7 +20,21 @@ Socket::Socket(const sockaddr_in& address)
 
 }
 Socket::~Socket()
+{ 
+    close(fd);
+}
+
+Socket &Socket::operator =(Socket&& rhs) noexcept
 {
+    fd = rhs.fd;
+    rhs.fd = -1;
+    return *this;
+}
+
+Socket::Socket(Socket&& rhs) noexcept
+{
+    fd = rhs.fd;
+    rhs.fd = -1;
 }
 
 void Socket::send_to(Message message, sockaddr_in remote_address){
@@ -48,6 +62,7 @@ void Socket::recive_from(Message message, sockaddr_in local_address){
         std::cout<< message.text ;
     }
 }
+
 
 
 

@@ -1,19 +1,15 @@
-#include <QCoreApplication>
+//#include <QCoreApplication>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#include "socket.h"
 #include <thread>
 #include <pthread.h>
 #include <iostream>
-std::string Global_name;
-struct ip_config{
-    std::string ip_local="127.0.0.";
-    std::string ip_remote="127.0.0.";
-    std::string port_local_var="3265";
-    std::string port_remote_var="3265";
-};
-sockaddr_in make_ip_address(const std::string& ip_address,int port){
+
+#include "socket.h"
+#include "ip_configuration.h"
+
+sockaddr_in make_ip_address(std::string& ip_address,int port){
 
     sockaddr_in address{};    // Porque se recomienda inicializar a 0
     address.sin_family = AF_INET;
@@ -21,6 +17,9 @@ sockaddr_in make_ip_address(const std::string& ip_address,int port){
     inet_aton(ip_address.c_str(), &address.sin_addr);
     return address;
 }
+
+std::string Global_name;
+
 void write(Message& message_main,bool condition){
 
     if(condition){
@@ -74,7 +73,7 @@ std::string choose_port(std::string parameter){
     return aux2;
 
 }
-void call_sent_to (Socket socket_main,sockaddr_in remote_address_main){
+void call_sent_to (Socket& socket_main,sockaddr_in remote_address_main){
      bool condition = true;
      Message message_main;
      std::cin.ignore();
@@ -89,7 +88,7 @@ void call_sent_to (Socket socket_main,sockaddr_in remote_address_main){
             socket_main.send_to(message_main,remote_address_main);
      }
 }
-void call_recieve_from (Socket socket_main,sockaddr_in local_address_main){
+void call_recieve_from (Socket& socket_main,sockaddr_in local_address_main){
 
     bool condition = true;
     Message message_main;
@@ -102,27 +101,36 @@ void request_cancelation(std::thread& thread){
 
         pthread_cancel(thread.native_handle());
 }
-void personalizadoS(ip_config& config){
+void personalizadoS(ip_configuration& ip_config){
     std::cout<<"Ip Local"<<std::endl;
-    config.ip_local = menu(config.ip_local);
+    ip_config.set_ip_local(menu("127.0.0."));
     std::cout<<"Ip Remota"<<std::endl;
-    config.ip_remote = menu(config.ip_remote);
+    ip_config.set_ip_remote(menu("127.0.0."));
     std::cout<<"Puerto Local"<<std::endl;
-    config.port_local_var = choose_port(config.port_local_var);
+    ip_config.set_port_local(choose_port("3265"));
     std::cout<<"Puerto remoto"<<std::endl;
-    config.port_remote_var = choose_port(config.port_remote_var);
+    ip_config.set_port_remote(choose_port("3265"));
 }
-void personalizadoA(ip_config& config){
+void personalizadoA(ip_configuration& ip_config){
+    std::string aux="";
     std::cout << "Ip Local"<<std::endl;
-    std::cin  >> config.ip_local;
+    std::cin>>aux;
+    ip_config.set_ip_local(aux);
+    aux="";
     std::cout << "Ip Remota"<<std::endl;
-    std::cin  >> config.ip_remote;
+    std::cin>>aux;
+    ip_config.set_ip_remote(aux);
+    aux="";
     std::cout << "Puerto Local"<<std::endl;
-    std::cin  >> config.port_local_var;
+    std::cin>>aux;
+    ip_config.set_port_local(aux);
+    aux="";
     std::cout << "Puerto remoto"<<std::endl;
-    std::cin  >> config.port_remote_var;
+    std::cin>>aux;
+    ip_config.set_port_remote(aux);
+    aux="";
 }
-void defecto(ip_config& config){
+void defecto(ip_configuration& ip_config){
     int op=-1;
     while(op!=0){
         std::cout<<"1.- Host"<<std::endl;
@@ -130,17 +138,17 @@ void defecto(ip_config& config){
         std::cin>>op;
         switch (op) {
         case 1:
-            config.ip_local = "127.0.0.1";
-            config.ip_remote = "127.0.0.2";
-            config.port_local_var = "32651";
-            config.port_remote_var = "32652";
+            ip_config.set_ip_local("127.0.0.1");
+            ip_config.set_ip_remote("127.0.0.2");
+            ip_config.set_port_local("32651");
+            ip_config.set_port_remote("32652");
             op=0;
             break;
         case 2:
-            config.ip_local = "127.0.0.2";
-            config.ip_remote = "127.0.0.1";
-            config.port_local_var = "32652";
-            config.port_remote_var = "32651";
+            ip_config.set_ip_local("127.0.0.2");
+            ip_config.set_ip_remote("127.0.0.1");
+            ip_config.set_port_local("32652");
+            ip_config.set_port_remote("32651");
             op=0;
             break;
         default:
@@ -150,7 +158,7 @@ void defecto(ip_config& config){
     }
 }
 
-void menu_principal(ip_config& config){
+void menu_principal(ip_configuration& ip_config){
     int op=-1;
     while (op!=0){
         std::cout<<"Elija la configuración"<<std::endl;
@@ -161,15 +169,15 @@ void menu_principal(ip_config& config){
         std::cin>>op;
         switch(op){
            case 1:
-              defecto(config);
+              defecto(ip_config);
               op=0;
               break;
            case 2:
-              personalizadoS(config);
+              personalizadoS(ip_config);
               op=0;
               break;
            case 3:
-              personalizadoA(config);
+              personalizadoA(ip_config);
               op=0;
               break;
            case 0:
@@ -189,22 +197,26 @@ void menu_principal(ip_config& config){
 int main()
 {
     //select ip and port
-    ip_config config;
-    menu_principal(config);
+    ip_configuration ip_config;
+    menu_principal(ip_config);
 
-    int aux= atoi(config.port_local_var.c_str());
-    int aux1= atoi(config.port_remote_var.c_str());
+    std::string ip_local_var = ip_config.get_ip_local();
+    std::string ip_remote_var = ip_config.get_ip_remote();
+    int port_local_var= atoi(ip_config.get_port_local().c_str());
+    int port_remote_var= atoi(ip_config.get_port_remote().c_str());
+
     std::cout<<"Introduzca su nombre"<<std::endl;
     std::cin>>Global_name;
     //create sockets
-    sockaddr_in local_address_main = make_ip_address(config.ip_local,aux);
-    sockaddr_in remote_address_main = make_ip_address(config.ip_remote,aux1);
-    Socket socket_main(local_address_main);
+    sockaddr_in local_address_main = make_ip_address(ip_local_var,port_local_var);
+    sockaddr_in remote_address_main = make_ip_address(ip_remote_var,port_remote_var);
+    Socket socket_main;
     //Send and recieve messages
 
        try{
-            std::thread thread1(&call_sent_to,socket_main,remote_address_main);
-            std::thread thread2(&call_recieve_from,socket_main,local_address_main);
+            socket_main = Socket(local_address_main);
+            std::thread thread1(&call_sent_to,std::ref(socket_main),remote_address_main);
+            std::thread thread2(&call_recieve_from,std::ref(socket_main),local_address_main);
             thread1.join();
             request_cancelation(thread2);
             thread2.join();
